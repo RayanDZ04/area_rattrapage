@@ -31,6 +31,100 @@ body {
   overflow: hidden;
 }
 
+.hero-orbit {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  animation: orbit-spin 28s linear infinite;
+}
+
+.orbit-ring--large {
+  width: 520px;
+  height: 520px;
+}
+
+.orbit-ring--xl {
+  width: 1200px;
+  height: 1200px;
+  animation-duration: 34s;
+}
+
+.orbit-ring--medium {
+  width: 720px;
+  height: 720px;
+  animation-duration: 26s;
+  animation-direction: reverse;
+}
+
+.orbit-ring--small {
+  width: 520px;
+  height: 520px;
+  animation-duration: 22s;
+  animation-direction: reverse;
+}
+
+.orbit-ring--micro {
+  width: 280px;
+  height: 280px;
+  animation-duration: 18s;
+}
+
+.orbit-ring--large {
+  width: 920px;
+  height: 920px;
+}
+
+.orbit-icon {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+
+.orbit-icon--top {
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.orbit-icon--right {
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.orbit-icon--bottom {
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.orbit-icon--left {
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@keyframes orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .hero-shell::before,
 .hero-shell::after {
   content: "";
@@ -144,6 +238,9 @@ body.home.is-authenticated .hero {
   display: none;
 }
 
+body.home.is-authenticated .info-content {
+  display: none;
+}
 
 .hero-panel {
   background: transparent;
@@ -152,6 +249,58 @@ body.home.is-authenticated .hero {
   padding: 48px 0 0;
   box-shadow: none;
   max-width: 760px;
+}
+
+.info-section {
+  background: #ffffff;
+  padding: 40px 8vw 64px;
+  display: flex;
+  justify-content: center;
+}
+
+.info-content {
+  margin-top: 0;
+  color: #111111;
+  max-width: 1080px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: center;
+  gap: 32px;
+}
+
+.info-text {
+  text-align: left;
+}
+
+.info-content h2 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+}
+
+.info-content p {
+  margin: 0 0 18px;
+  color: #5b6472;
+  font-size: 1.1rem;
+}
+
+.info-panel__cta {
+  border: none;
+  background: #111111;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 14px 40px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.info-media img {
+  width: 100%;
+  max-width: 460px;
+  display: block;
+  border-radius: 0;
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.2);
+  justify-self: end;
 }
 
 .hero-content h1 {

@@ -197,3 +197,26 @@ if (settingsForm) {
     alert("Profil mis à jour");
   });
 }
+
+const homeMediaImage = document.querySelector(".info-media img");
+if (homeMediaImage) {
+  const homeImages = [
+    "assets/acceuil_1.png",
+    "assets/acceuil_2.png",
+    "assets/acceuil_2_1.png",
+    "assets/acceuil_3.png",
+    "assets/acceuil_4.png",
+    "assets/acceuil_5.png",
+    "assets/acceuil_6.png",
+    "assets/acceuil_7.png",
+    "assets/acceuil_8.png",
+    "assets/acceuil_9.png",
+    "assets/acceuil_10.png",
+  ];
+  let currentIndex = 0;
+
+  setInterval(() => {
+    currentIndex = (currentIndex + 1) % homeImages.length;
+    homeMediaImage.src = homeImages[currentIndex];
+  }, 3000);
+}
