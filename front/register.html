@@ -22,7 +22,7 @@
             </a>
           </div>
           <div class="top-actions">
-            <button class="bubble button auth-button" type="button">Se connecter</button>
+            <a class="bubble button auth-button" href="login.html">Se connecter</a>
           </div>
         </header>
 
@@ -33,8 +33,12 @@
               <p>Inscris-toi pour connecter tes services et automatiser tes actions.</p>
               <form class="auth-form">
                 <label class="auth-field">
-                  <span>Nom complet</span>
-                  <input type="text" name="name" placeholder="Jean Dupont" required />
+                  <span>Prénom</span>
+                  <input type="text" name="first_name" placeholder="Jean" required />
+                </label>
+                <label class="auth-field">
+                  <span>Nom</span>
+                  <input type="text" name="last_name" placeholder="Dupont" required />
                 </label>
                 <label class="auth-field">
                   <span>Email</span>
@@ -49,6 +53,7 @@
                   <input type="password" name="confirm" placeholder="••••••" required />
                 </label>
                 <button class="cta" type="submit">S'inscrire</button>
+                <button class="cta cta-google" type="button">Continuer avec Google</button>
               </form>
             </div>
           </div>
