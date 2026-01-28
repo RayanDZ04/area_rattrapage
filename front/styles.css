@@ -1,0 +1,160 @@
+:root {
+  color-scheme: dark;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  --bg: #1f1f1f;
+  --text: #ffffff;
+  --muted: #cbd5f5;
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: var(--text);
+}
+
+.app {
+  min-height: 100vh;
+  padding: 32px 8vw 64px;
+  position: relative;
+  overflow: hidden;
+}
+
+.app::before,
+.app::after {
+  content: "";
+  position: absolute;
+  inset: 10% -10% auto -10%;
+  height: 220px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+.app::after {
+  inset: 30% -10% auto -10%;
+  height: 260px;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 8px 14px;
+  box-shadow: var(--shadow);
+}
+
+.search-icon {
+  width: 18px;
+  height: 18px;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  width: 260px;
+  color: var(--text);
+}
+
+.logo {
+  font-size: 2.8rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #111111;
+}
+
+.hero {
+  margin-top: 10vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.hero-panel {
+  background: rgba(17, 17, 17, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  padding: 48px 56px;
+  box-shadow: var(--shadow);
+  max-width: 760px;
+}
+
+.hero-content h1 {
+  font-size: clamp(2.8rem, 7vw, 5.6rem);
+  margin: 0 0 16px;
+  line-height: 1.05;
+}
+
+.hero-content p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--muted);
+  max-width: 600px;
+}
+
+.button {
+  width: auto;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  text-transform: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.bubble.button {
+  width: auto;
+  height: auto;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+.auth-button {
+  padding: 9px 16px;
+  font-size: 0.85rem;
+  margin-top: -6px;
+}
+
+.cta {
+  margin-top: 32px;
+  border: none;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 16px 46px;
+  border-radius: 999px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
