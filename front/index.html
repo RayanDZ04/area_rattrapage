@@ -37,6 +37,29 @@
       </section>
     </div>
 
+    <div class="service-modal" id="service-modal" aria-hidden="true">
+      <div class="service-modal__backdrop" data-close="true"></div>
+      <div class="service-modal__content" role="dialog" aria-modal="true" aria-label="Services">
+        <div class="service-modal__header">
+          <h2>AREA</h2>
+          <button class="service-modal__close" type="button" aria-label="Fermer" data-close="true">×</button>
+        </div>
+        <label class="service-modal__search">
+          <span class="service-modal__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="M20 20l-3.5-3.5"></path>
+            </svg>
+          </span>
+          <input type="search" placeholder="Rechercher un service" aria-label="Rechercher un service" />
+        </label>
+        <p class="service-modal__section">Services</p>
+        <ul class="service-modal__list">
+          <li><span>Google</span></li>
+        </ul>
+      </div>
+    </div>
+
     <script src="app.js"></script>
   </body>
 </html>

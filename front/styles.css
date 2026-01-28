@@ -144,9 +144,6 @@ body.home.is-authenticated .hero {
   display: none;
 }
 
-body.is-authenticated .user-display {
-  display: none;
-}
 
 .hero-panel {
   background: transparent;
@@ -239,4 +236,108 @@ body.is-authenticated .user-display {
   padding: 12px 14px;
   color: #ffffff;
   font-size: 1rem;
+}
+
+.service-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.service-modal.is-open {
+  display: flex;
+}
+
+.service-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.service-modal__content {
+  position: relative;
+  background: #ffffff;
+  color: #111111;
+  width: min(560px, 92vw);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+}
+
+.service-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.service-modal__header h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.service-modal__close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.service-modal__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid #111111;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: #f3f4f6;
+}
+
+.service-modal__icon {
+  width: 18px;
+  height: 18px;
+  color: #111111;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.service-modal__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.service-modal__search input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 0.95rem;
+  background: transparent;
+  color: #111111;
+}
+
+.service-modal__section {
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.service-modal__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.service-modal__list li {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f4f4f5;
+  font-weight: 600;
 }

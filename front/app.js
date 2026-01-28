@@ -133,6 +133,40 @@ if (logoutButton) {
   });
 }
 
+const serviceModal = document.getElementById("service-modal");
+const searchInput = document.querySelector(".top-actions .search input");
+const searchBar = document.querySelector(".top-actions .search");
+
+const openServiceModal = () => {
+  if (!serviceModal) return;
+  serviceModal.classList.add("is-open");
+  serviceModal.setAttribute("aria-hidden", "false");
+};
+
+const closeServiceModal = () => {
+  if (!serviceModal) return;
+  serviceModal.classList.remove("is-open");
+  serviceModal.setAttribute("aria-hidden", "true");
+};
+
+if (searchInput) {
+  searchInput.addEventListener("focus", openServiceModal);
+  searchInput.addEventListener("click", openServiceModal);
+}
+
+if (searchBar) {
+  searchBar.addEventListener("click", openServiceModal);
+}
+
+if (serviceModal) {
+  serviceModal.addEventListener("click", (event) => {
+    const target = event.target;
+    if (target && target.getAttribute("data-close") === "true") {
+      closeServiceModal();
+    }
+  });
+}
+
 if (settingsForm) {
   settingsForm.addEventListener("submit", async (event) => {
     event.preventDefault();
