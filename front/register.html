@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AREA - Inscription</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <section class="hero-shell">
+        <header class="topbar">
+          <div class="brand">
+            <div class="logo">AREA</div>
+            <a class="return-link" href="index.html">
+              <span class="return-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+              </span>
+              Retour à l’accueil
+            </a>
+          </div>
+          <div class="top-actions">
+            <button class="bubble button auth-button" type="button">Se connecter</button>
+          </div>
+        </header>
+
+        <main class="hero">
+          <div class="hero-panel">
+            <div class="hero-content">
+              <h1>Créer un compte</h1>
+              <p>Inscris-toi pour connecter tes services et automatiser tes actions.</p>
+              <form class="auth-form">
+                <label class="auth-field">
+                  <span>Nom complet</span>
+                  <input type="text" name="name" placeholder="Jean Dupont" required />
+                </label>
+                <label class="auth-field">
+                  <span>Email</span>
+                  <input type="email" name="email" placeholder="you@example.com" required />
+                </label>
+                <label class="auth-field">
+                  <span>Mot de passe</span>
+                  <input type="password" name="password" placeholder="••••••" required />
+                </label>
+                <label class="auth-field">
+                  <span>Confirmer le mot de passe</span>
+                  <input type="password" name="confirm" placeholder="••••••" required />
+                </label>
+                <button class="cta" type="submit">S'inscrire</button>
+              </form>
+            </div>
+          </div>
+        </main>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
