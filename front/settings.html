@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AREA - Connexion</title>
+    <title>AREA - Paramètres</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -21,27 +21,24 @@
               Retour à l’accueil
             </a>
           </div>
-          <div class="top-actions">
-            <a class="bubble button auth-button" href="register.html">S'inscrire</a>
-          </div>
         </header>
 
         <main class="hero">
           <div class="hero-panel">
             <div class="hero-content">
-              <h1>Se connecter</h1>
-              <p>Accède à ton espace pour gérer tes automatisations.</p>
-              <form class="auth-form" id="login-form">
+              <h1>Paramètres</h1>
+              <p>Gère ton compte et tes préférences.</p>
+              <form class="auth-form" id="settings-form">
                 <label class="auth-field">
-                  <span>Email</span>
-                  <input type="email" name="email" placeholder="you@example.com" required />
+                  <span>Prénom</span>
+                  <input type="text" name="first_name" placeholder="Prénom" required />
                 </label>
                 <label class="auth-field">
-                  <span>Mot de passe</span>
-                  <input type="password" name="password" placeholder="••••••" required />
+                  <span>Nom</span>
+                  <input type="text" name="last_name" placeholder="Nom" required />
                 </label>
-                <button class="cta" type="submit">Se connecter</button>
-                <button class="cta cta-google" type="button">Se connecter avec Google</button>
+                <button class="cta" type="submit">Enregistrer</button>
+                <button class="cta cta-google" id="logout-button" type="button">Se déconnecter</button>
               </form>
             </div>
           </div>

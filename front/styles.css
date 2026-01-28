@@ -140,6 +140,14 @@ body {
   z-index: 1;
 }
 
+body.home.is-authenticated .hero {
+  display: none;
+}
+
+body.is-authenticated .user-display {
+  display: none;
+}
+
 .hero-panel {
   background: transparent;
   border: none;
