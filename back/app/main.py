@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from sqlalchemy import text
 
 from .database import Base, engine
-from .routers import auth
+from .routers import auth, applets
 
 load_dotenv(override=True)
 
@@ -72,3 +72,4 @@ def on_startup():
 
 
 app.include_router(auth.router)
+app.include_router(applets.router)

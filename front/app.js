@@ -67,6 +67,8 @@ const myApplets = document.querySelector(".my-applets");
 const explorerTab = document.querySelector("[data-tab='explorer']");
 const myAppletsTab = document.querySelector("[data-tab='my-applets']");
 const myAppletsCta = document.querySelector(".my-applets__cta");
+const myAppletsList = document.querySelector(".my-applets__list");
+const myAppletsEmpty = document.querySelector(".my-applets__empty");
 
 const showExplorer = () => {
   if (authQuick) authQuick.style.display = "block";
@@ -80,6 +82,7 @@ const showMyApplets = () => {
   if (myApplets) myApplets.style.display = "block";
   explorerTab?.classList.remove("is-active");
   myAppletsTab?.classList.add("is-active");
+  fetchApplets();
 };
 
 if (explorerTab) {
@@ -92,6 +95,82 @@ if (myAppletsTab) {
 
 if (myAppletsCta) {
   myAppletsCta.addEventListener("click", showExplorer);
+}
+
+const serviceLogo = (service) =>
+  service === "agenda" ? "assets/agenda.webp" : "assets/gmail.webp";
+
+const renderApplets = (applets) => {
+  if (!myAppletsList || !myAppletsEmpty) return;
+  if (!applets.length) {
+    myAppletsList.hidden = true;
+    myAppletsEmpty.hidden = false;
+    return;
+  }
+  myAppletsEmpty.hidden = true;
+  myAppletsList.hidden = false;
+  myAppletsList.innerHTML = applets
+    .map(
+      (applet) => `
+      <article class="my-applet-card" data-id="${applet.id}">
+        <div class="my-applet-card__header">
+          <div class="my-applet-card__logos">
+            <img src="${serviceLogo(applet.action_service)}" alt="Action" class="my-applet-card__logo" />
+            <span class="my-applet-card__arrow">→</span>
+            <img src="${serviceLogo(applet.reaction_service)}" alt="Réaction" class="my-applet-card__logo" />
+          </div>
+          <button class="my-applet-card__toggle" type="button" aria-pressed="true">
+            <span class="my-applet-card__dot"></span>
+            <span>Activé</span>
+          </button>
+        </div>
+        <div class="my-applet-card__body">
+          <h3>${applet.name}</h3>
+        </div>
+        <button class="my-applet-card__delete" type="button">Supprimer</button>
+      </article>
+    `
+    )
+    .join("");
+};
+
+const fetchApplets = async () => {
+  if (!isAuth) return;
+  const token = localStorage.getItem("access_token");
+  const response = await fetch(`${API_URL}/applets`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) return;
+  const applets = await response.json();
+  renderApplets(applets);
+};
+
+if (myAppletsList) {
+  myAppletsList.addEventListener("click", async (event) => {
+    const target = event.target;
+    const card = target?.closest(".my-applet-card");
+    if (!card) return;
+    if (target.closest(".my-applet-card__toggle")) {
+      const toggle = target.closest(".my-applet-card__toggle");
+      const label = toggle.querySelector("span:last-child");
+      const isActive = toggle.getAttribute("aria-pressed") !== "false";
+      toggle.setAttribute("aria-pressed", String(!isActive));
+      toggle.classList.toggle("is-off", isActive);
+      if (label) label.textContent = isActive ? "Désactivé" : "Activé";
+      return;
+    }
+    if (target.classList.contains("my-applet-card__delete")) {
+      const token = localStorage.getItem("access_token");
+      const appletId = card.dataset.id;
+      const response = await fetch(`${API_URL}/applets/${appletId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        fetchApplets();
+      }
+    }
+  });
 }
 
 
@@ -200,6 +279,7 @@ const appletModal = document.getElementById("applet-modal");
 const appletPlus = document.querySelector(".auth-quick__plus");
 const appletSteps = document.querySelectorAll(".applet-step");
 const appletDots = document.querySelectorAll(".applet-dot");
+const appletNameInput = document.querySelector(".applet-step[data-step='7'] input");
 let appletStepIndex = 0;
 let actionService = null;
 let reactionService = null;
@@ -262,9 +342,10 @@ const updateNextButtonState = () => {
   if (currentStep === 4) enabled = Boolean(reactionService);
   if (currentStep === 5) enabled = Boolean(reactionChoice);
   if (currentStep === 6) enabled = Boolean(reactionChoice);
-  if (currentStep === 7) enabled = true;
+  if (currentStep === 7) enabled = Boolean(appletNameInput?.value?.trim());
   appletNext.disabled = !enabled;
   appletNext.classList.toggle("is-disabled", !enabled);
+  appletNext.textContent = currentStep === 7 ? "Créer" : "Suivant";
 };
 
 const openAppletModal = () => {
@@ -274,6 +355,7 @@ const openAppletModal = () => {
   reactionService = null;
   actionChoice = null;
   reactionChoice = null;
+  if (appletNameInput) appletNameInput.value = "";
   updateAppletSteps();
   appletModal.classList.add("is-open");
   appletModal.setAttribute("aria-hidden", "false");
@@ -323,6 +405,10 @@ if (appletModal) {
   });
 }
 
+if (appletNameInput) {
+  appletNameInput.addEventListener("input", updateNextButtonState);
+}
+
 const appletPrev = document.querySelector("[data-applet-prev='true']");
 const appletNext = document.querySelector("[data-applet-next='true']");
 
@@ -334,7 +420,33 @@ if (appletPrev) {
 }
 
 if (appletNext) {
-  appletNext.addEventListener("click", () => {
+  appletNext.addEventListener("click", async () => {
+    const currentStep = appletStepIndex + 1;
+    if (currentStep === 7) {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+      const payload = {
+        name: appletNameInput?.value?.trim() || "Mon applet",
+        action_service: actionService,
+        action_choice: actionChoice,
+        reaction_service: reactionService,
+        reaction_choice: reactionChoice,
+      };
+      const response = await fetch(`${API_URL}/applets`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        closeAppletModal();
+        fetchApplets();
+        showMyApplets();
+      }
+      return;
+    }
     appletStepIndex = Math.min(appletSteps.length - 1, appletStepIndex + 1);
     updateAppletSteps();
   });

@@ -19,6 +19,10 @@ class User(Base):
         back_populates="user", cascade="all, delete-orphan"
     )
 
+    applets: Mapped[list["Applet"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+
 
 class ServiceToken(Base):
     __tablename__ = "service_tokens"
@@ -31,3 +35,18 @@ class ServiceToken(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user: Mapped[User] = relationship(back_populates="service_tokens")
+
+
+class Applet(Base):
+    __tablename__ = "applets"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), index=True)
+    name: Mapped[str] = mapped_column(String(255))
+    action_service: Mapped[str] = mapped_column(String(50))
+    action_choice: Mapped[str] = mapped_column(String(100))
+    reaction_service: Mapped[str] = mapped_column(String(50))
+    reaction_choice: Mapped[str] = mapped_column(String(100))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    user: Mapped[User] = relationship(back_populates="applets")

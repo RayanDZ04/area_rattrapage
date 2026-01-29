@@ -354,6 +354,97 @@ body.home:not(.is-authenticated) .auth-quick__titles-bar {
   cursor: pointer;
 }
 
+.my-applets__list {
+  margin: 24px auto 0;
+  max-width: 720px;
+}
+
+.my-applet-card {
+  background: #2b2b2b;
+  color: #ffffff;
+  border-radius: 22px;
+  padding: 20px 22px;
+  box-shadow: 0 22px 45px rgba(17, 24, 39, 0.22);
+  display: grid;
+  gap: 16px;
+}
+
+.my-applet-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.my-applet-card__logos {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.my-applet-card__logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  background: #1a73e8;
+  border-radius: 12px;
+  padding: 6px;
+}
+
+.my-applet-card__arrow {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.my-applet-card__toggle {
+  border: none;
+  background: #111111;
+  color: #ffffff;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.my-applet-card__dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+}
+
+.my-applet-card__toggle.is-off .my-applet-card__dot {
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+}
+
+.my-applet-card__body h3 {
+  margin: 0 0 6px;
+  font-size: 1.3rem;
+  color: #ffffff;
+}
+
+.my-applet-card__body p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.my-applet-card__delete {
+  justify-self: start;
+  border: none;
+  background: #111111;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
 .auth-quick__card {
   width: min(320px, 100%);
   min-height: 360px;
