@@ -185,6 +185,13 @@ const filterStepByService = (stepNumber, service) => {
   });
 };
 
+const showConfig = (choiceKey) => {
+  const configs = document.querySelectorAll(".applet-config");
+  configs.forEach((config) => {
+    config.hidden = config.dataset.config !== choiceKey;
+  });
+};
+
 const updateAppletSteps = () => {
   appletSteps.forEach((step, index) => {
     step.hidden = index !== appletStepIndex;
@@ -193,7 +200,23 @@ const updateAppletSteps = () => {
     dot.classList.toggle("is-active", index === appletStepIndex);
   });
   filterStepByService(2, actionService);
-  filterStepByService(4, reactionService);
+  filterStepByService(5, reactionService);
+  if (appletStepIndex + 1 === 3) {
+    showConfig(actionChoice);
+  }
+  if (appletStepIndex + 1 === 6) {
+    showConfig(reactionChoice);
+  }
+  if (appletStepIndex + 1 === 7) {
+    const actionLogo = document.querySelector("[data-confirm='action']");
+    const reactionLogo = document.querySelector("[data-confirm='reaction']");
+    if (actionLogo) {
+      actionLogo.src = actionService === "agenda" ? "assets/agenda.webp" : "assets/gmail.webp";
+    }
+    if (reactionLogo) {
+      reactionLogo.src = reactionService === "agenda" ? "assets/agenda.webp" : "assets/gmail.webp";
+    }
+  }
   updateNextButtonState();
 };
 
@@ -203,8 +226,11 @@ const updateNextButtonState = () => {
   let enabled = true;
   if (currentStep === 1) enabled = Boolean(actionService);
   if (currentStep === 2) enabled = Boolean(actionChoice);
-  if (currentStep === 3) enabled = Boolean(reactionService);
-  if (currentStep === 4) enabled = Boolean(reactionChoice);
+  if (currentStep === 3) enabled = Boolean(actionChoice);
+  if (currentStep === 4) enabled = Boolean(reactionService);
+  if (currentStep === 5) enabled = Boolean(reactionChoice);
+  if (currentStep === 6) enabled = Boolean(reactionChoice);
+  if (currentStep === 7) enabled = true;
   appletNext.disabled = !enabled;
   appletNext.classList.toggle("is-disabled", !enabled);
 };
@@ -253,11 +279,11 @@ if (appletModal) {
       if (stepNumber === 2) {
         actionChoice = choice || null;
       }
-      if (stepNumber === 3) {
+      if (stepNumber === 4) {
         reactionService = service;
         reactionChoice = null;
       }
-      if (stepNumber === 4) {
+      if (stepNumber === 5) {
         reactionChoice = choice || null;
       }
       updateAppletSteps();

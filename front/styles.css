@@ -757,3 +757,50 @@ body.home:not(.is-authenticated) .auth-quick__titles-bar {
 .applet-dot.is-active {
   background: #111111;
 }
+
+.applet-config {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.applet-config label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #111111;
+}
+
+.applet-config input,
+.applet-config textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(17, 24, 39, 0.15);
+  background: #ffffff;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  color: #111111;
+}
+
+.applet-confirm {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #111111;
+  font-weight: 700;
+}
+
+.applet-confirm__logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  background: #1a73e8;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.applet-confirm__arrow {
+  font-size: 1.3rem;
+}

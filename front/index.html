@@ -172,6 +172,29 @@
             </div>
           </div>
           <div class="applet-step" data-step="3" hidden>
+            <p class="applet-step__title">Détails de l'action</p>
+            <div class="applet-config" data-config="gmail_new_mail">
+              <label>
+                <span>Adresse email</span>
+                <input type="email" placeholder="ex: contact@mail.com" />
+              </label>
+            </div>
+            <div class="applet-config" data-config="agenda_new_event">
+              <label>
+                <span>Calendrier</span>
+                <input type="text" placeholder="ex: Calendrier principal" />
+              </label>
+              <label>
+                <span>Date de début</span>
+                <input type="date" />
+              </label>
+              <label>
+                <span>Date de fin</span>
+                <input type="date" />
+              </label>
+            </div>
+          </div>
+          <div class="applet-step" data-step="4" hidden>
             <p class="applet-step__title">Choisis un service</p>
             <div class="applet-step__grid">
               <div class="applet-card" data-service="gmail">
@@ -188,7 +211,7 @@
               </div>
             </div>
           </div>
-          <div class="applet-step" data-step="4" hidden>
+          <div class="applet-step" data-step="5" hidden>
             <p class="applet-step__title">Choisis une réaction</p>
             <div class="applet-step__grid">
               <div class="applet-card" data-service="gmail" data-choice="gmail_send_mail">
@@ -205,6 +228,51 @@
               </div>
             </div>
           </div>
+          <div class="applet-step" data-step="6" hidden>
+            <p class="applet-step__title">Détails de la réaction</p>
+            <div class="applet-config" data-config="gmail_send_mail">
+              <label>
+                <span>À</span>
+                <input type="email" placeholder="ex: destinataire@mail.com" />
+              </label>
+              <label>
+                <span>Objet</span>
+                <input type="text" placeholder="Objet du mail" />
+              </label>
+              <label>
+                <span>Message</span>
+                <textarea rows="4" placeholder="Votre message"></textarea>
+              </label>
+            </div>
+            <div class="applet-config" data-config="agenda_create_event">
+              <label>
+                <span>Titre</span>
+                <input type="text" placeholder="Titre de l'évènement" />
+              </label>
+              <label>
+                <span>Date de début</span>
+                <input type="date" />
+              </label>
+              <label>
+                <span>Date de fin</span>
+                <input type="date" />
+              </label>
+            </div>
+          </div>
+          <div class="applet-step" data-step="7" hidden>
+            <p class="applet-step__title">Nomme ton applet</p>
+            <div class="applet-config">
+              <label>
+                <span>Nom de l'applet</span>
+                <input type="text" placeholder="ex: Alerte Gmail vers Agenda" />
+              </label>
+            </div>
+            <div class="applet-confirm">
+              <img src="assets/gmail.webp" alt="Action" class="applet-confirm__logo" data-confirm="action" />
+              <span class="applet-confirm__arrow">→</span>
+              <img src="assets/gmail.webp" alt="Réaction" class="applet-confirm__logo" data-confirm="reaction" />
+            </div>
+          </div>
         </div>
         <div class="applet-modal__footer">
           <button class="applet-btn applet-btn--ghost" type="button" data-applet-prev="true">Retour</button>
@@ -213,6 +281,9 @@
             <span class="applet-dot" data-dot="2"></span>
             <span class="applet-dot" data-dot="3"></span>
             <span class="applet-dot" data-dot="4"></span>
+            <span class="applet-dot" data-dot="5"></span>
+            <span class="applet-dot" data-dot="6"></span>
+            <span class="applet-dot" data-dot="7"></span>
           </div>
           <button class="applet-btn" type="button" data-applet-next="true">Suivant</button>
         </div>
