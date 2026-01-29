@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000";
+const API_URL = "http://localhost:8080";
 
 const loginForm = document.getElementById("login-form");
 const registerForm = document.getElementById("register-form");
@@ -18,6 +18,22 @@ const setUserDisplay = () => {
   }
 };
 
+const applyAuthFromUrl = () => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+  const firstName = params.get("first_name");
+  if (token) {
+    localStorage.setItem("access_token", token);
+  }
+  if (firstName) {
+    localStorage.setItem("user_first_name", firstName);
+  }
+  if (token || firstName) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+};
+
+applyAuthFromUrl();
 setUserDisplay();
 
 const isAuth = Boolean(localStorage.getItem("access_token"));
@@ -132,6 +148,13 @@ if (logoutButton) {
     window.location.href = "index.html";
   });
 }
+
+const googleButtons = document.querySelectorAll(".google-auth");
+googleButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    window.location.href = "http://localhost:8080/auth/google/login";
+  });
+});
 
 const serviceModal = document.getElementById("service-modal");
 const searchInput = document.querySelector(".top-actions .search input");

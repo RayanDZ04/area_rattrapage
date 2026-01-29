@@ -38,7 +38,7 @@ install: venv
 	PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 $(PIP) install -r $(BACK_DIR)/requirements.txt
 
 run:
-	cd $(BACK_DIR) && $(PY) -m uvicorn app.main:app --reload
+	cd $(BACK_DIR) && $(PY) -m uvicorn app.main:app --reload --port 8080
 
 backend: run
 
