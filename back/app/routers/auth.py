@@ -32,7 +32,7 @@ oauth.register(
     client_secret=get_env("GOOGLE_CLIENT_SECRET"),
     server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
     client_kwargs={
-        "scope": "openid email profile",
+        "scope": "openid email profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events",
         "token_endpoint_auth_method": "client_secret_post",
     },
 )
@@ -55,22 +55,22 @@ def get_current_user(
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = int(payload.get("sub"))
     except Exception as exc:
-        raise HTTPException(status_code=401, detail="Invalid token") from exc
+        raise HTTPException(status_code=401, detail="Token invalide") from exc
 
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=401, detail="User not found")
+        raise HTTPException(status_code=401, detail="Utilisateur introuvable")
     return user
 
 
 @router.post("/register", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)
 def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
     if len(payload.password) > 72:
-        raise HTTPException(status_code=400, detail="Password too long (max 72 chars)")
+        raise HTTPException(status_code=400, detail="Mot de passe trop long (max 72 caractères)")
 
     existing = db.query(models.User).filter(models.User.email == payload.email).first()
     if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Email déjà enregistré")
 
     user = models.User(
         first_name=payload.first_name,
@@ -88,9 +88,9 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
 def login(payload: schemas.UserLogin, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == payload.email).first()
     if not user or not user.hashed_password:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Identifiants invalides")
     if not verify_password(payload.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Identifiants invalides")
 
     token = create_access_token(subject=str(user.id))
     return {"access_token": token, "token_type": "bearer", "user": user}
@@ -106,7 +106,13 @@ async def google_login(request: Request):
     request.session.clear()
     backend_url = os.getenv("BACKEND_URL", "http://localhost:8080").rstrip("/")
     redirect_uri = f"{backend_url}/auth/google/callback"
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    return await oauth.google.authorize_redirect(
+        request,
+        redirect_uri,
+        access_type="offline",
+        prompt="consent",
+        include_granted_scopes="true",
+    )
 
 
 @router.get("/google/debug")
@@ -158,12 +164,12 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     except MismatchingStateError:
         code = request.query_params.get("code")
         if not code:
-            raise HTTPException(status_code=400, detail="Missing authorization code")
+            raise HTTPException(status_code=400, detail="Code d'autorisation manquant")
         token = await manual_exchange(code)
     except OAuthError:
         code = request.query_params.get("code")
         if not code:
-            raise HTTPException(status_code=400, detail="Missing authorization code")
+            raise HTTPException(status_code=400, detail="Code d'autorisation manquant")
         token = await manual_exchange(code)
     userinfo = token.get("userinfo")
     if not userinfo:
@@ -171,7 +177,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 
     email = userinfo.get("email")
     if not email:
-        raise HTTPException(status_code=400, detail="Google email not available")
+        raise HTTPException(status_code=400, detail="Email Google indisponible")
 
     first_name = userinfo.get("given_name") or "User"
     last_name = userinfo.get("family_name") or "Google"
@@ -188,11 +194,26 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user)
 
+    refresh_token = token.get("refresh_token")
+    if not refresh_token:
+        existing_token = (
+            db.query(models.ServiceToken)
+            .filter(models.ServiceToken.user_id == user.id, models.ServiceToken.provider == "google")
+            .order_by(models.ServiceToken.created_at.desc())
+            .first()
+        )
+        if existing_token:
+            refresh_token = existing_token.refresh_token
+
+    db.query(models.ServiceToken).filter(
+        models.ServiceToken.user_id == user.id,
+        models.ServiceToken.provider == "google",
+    ).delete()
     service_token = models.ServiceToken(
         user_id=user.id,
         provider="google",
         access_token=token.get("access_token", ""),
-        refresh_token=token.get("refresh_token"),
+        refresh_token=refresh_token,
     )
     db.add(service_token)
     db.commit()

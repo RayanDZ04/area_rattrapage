@@ -42,6 +42,8 @@ class AppletCreate(BaseModel):
     action_choice: str = Field(min_length=1)
     reaction_service: str = Field(min_length=1)
     reaction_choice: str = Field(min_length=1)
+    action_config: dict = Field(default_factory=dict)
+    reaction_config: dict = Field(default_factory=dict)
 
 
 class AppletOut(BaseModel):
@@ -51,6 +53,19 @@ class AppletOut(BaseModel):
     action_choice: str
     reaction_service: str
     reaction_choice: str
+    action_config: dict
+    reaction_config: dict
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AppletLogOut(BaseModel):
+    id: int
+    applet_id: int
+    status: str
+    message: str
     created_at: datetime
 
     class Config:

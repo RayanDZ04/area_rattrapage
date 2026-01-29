@@ -70,6 +70,7 @@
       <div class="auth-quick__titles-bar">
         <span class="auth-quick__title-item is-active" data-tab="explorer">Explorer</span>
         <span class="auth-quick__title-item" data-tab="my-applets">Mes applets</span>
+        <span class="auth-quick__title-item" data-tab="history">Mon historique</span>
       </div>
       <section class="info-section">
         <div class="info-content">
@@ -129,6 +130,16 @@
             </div>
             <button class="my-applet-card__delete" type="button">Supprimer</button>
           </article>
+        </div>
+      </section>
+      <section class="history" aria-hidden="true">
+        <div class="history__header">
+          <h2>Mon historique</h2>
+          <p>Retrouve toutes les exécutions récentes de tes applets.</p>
+        </div>
+        <div class="history__logs">
+          <p class="history__logs-empty">Aucune exécution récente.</p>
+          <ul class="history__logs-list" hidden></ul>
         </div>
       </section>
     </div>
@@ -200,24 +211,10 @@
           </div>
           <div class="applet-step" data-step="3" hidden>
             <p class="applet-step__title">Détails de l'action</p>
-            <div class="applet-config" data-config="gmail_new_mail">
+            <div class="applet-config" data-config="gmail_new_mail" hidden>
               <label>
-                <span>Adresse email</span>
-                <input type="email" placeholder="ex: contact@mail.com" />
-              </label>
-            </div>
-            <div class="applet-config" data-config="agenda_new_event">
-              <label>
-                <span>Calendrier</span>
-                <input type="text" placeholder="ex: Calendrier principal" />
-              </label>
-              <label>
-                <span>Date de début</span>
-                <input type="date" />
-              </label>
-              <label>
-                <span>Date de fin</span>
-                <input type="date" />
+                <span>Email déclencheur</span>
+                <input type="email" placeholder="ex: personne@mail.com" />
               </label>
             </div>
           </div>
@@ -257,7 +254,7 @@
           </div>
           <div class="applet-step" data-step="6" hidden>
             <p class="applet-step__title">Détails de la réaction</p>
-            <div class="applet-config" data-config="gmail_send_mail">
+            <div class="applet-config" data-config="gmail_send_mail" hidden>
               <label>
                 <span>À</span>
                 <input type="email" placeholder="ex: destinataire@mail.com" />
@@ -271,7 +268,7 @@
                 <textarea rows="4" placeholder="Votre message"></textarea>
               </label>
             </div>
-            <div class="applet-config" data-config="agenda_create_event">
+            <div class="applet-config" data-config="agenda_create_event" hidden>
               <label>
                 <span>Titre</span>
                 <input type="text" placeholder="Titre de l'évènement" />

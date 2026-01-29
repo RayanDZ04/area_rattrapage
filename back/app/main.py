@@ -1,11 +1,13 @@
 import os
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 from sqlalchemy import text
 
-from .database import Base, engine
+from .database import Base, engine, SessionLocal
+from . import models
 from .routers import auth, applets
 
 load_dotenv(override=True)
@@ -69,6 +71,48 @@ def on_startup():
                     conn.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email)"))
                     conn.execute(text("CREATE INDEX IF NOT EXISTS ix_users_id ON users (id)"))
                     break
+        applet_cols = conn.execute(text("PRAGMA table_info(applets)")).fetchall()
+        if applet_cols:
+            existing = {col[1] for col in applet_cols}
+            if "action_config" not in existing:
+                conn.execute(text("ALTER TABLE applets ADD COLUMN action_config TEXT DEFAULT '{}'"))
+            if "reaction_config" not in existing:
+                conn.execute(text("ALTER TABLE applets ADD COLUMN reaction_config TEXT DEFAULT '{}'"))
+            if "last_action_marker" not in existing:
+                conn.execute(text("ALTER TABLE applets ADD COLUMN last_action_marker VARCHAR(255)"))
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS applet_logs (
+                    id INTEGER PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    applet_id INTEGER NOT NULL,
+                    status VARCHAR(20) NOT NULL,
+                    message VARCHAR(255) NOT NULL,
+                    created_at DATETIME
+                )
+                """
+            )
+        )
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_applet_logs_user_id ON applet_logs (user_id)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_applet_logs_applet_id ON applet_logs (applet_id)"))
+
+    asyncio.create_task(run_applets_scheduler())
+
+
+async def run_applets_scheduler():
+    while True:
+        await asyncio.sleep(30)
+        db = SessionLocal()
+        try:
+            user_ids = [row[0] for row in db.query(models.Applet.user_id).distinct().all()]
+            for user_id in user_ids:
+                try:
+                    applets.run_applets_for_user(db, user_id)
+                except Exception:
+                    continue
+        finally:
+            db.close()
 
 
 app.include_router(auth.router)

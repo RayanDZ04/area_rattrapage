@@ -42,6 +42,24 @@ if (isAuth && (loginForm || registerForm)) {
   window.location.href = "index.html";
 }
 
+const startAppletRunner = () => {
+  if (!isAuthenticated()) return;
+  const runOnce = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+    await fetch(`${API_URL}/applets/run`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  };
+  runOnce();
+  setInterval(runOnce, 30000);
+};
+
+if (isAuth) {
+  startAppletRunner();
+}
+
 document.addEventListener("click", (event) => {
   const target = event.target.closest(".info-panel__cta, .info-media img, .info-media");
   if (!target) return;
@@ -66,23 +84,42 @@ if (authQuick) {
 const myApplets = document.querySelector(".my-applets");
 const explorerTab = document.querySelector("[data-tab='explorer']");
 const myAppletsTab = document.querySelector("[data-tab='my-applets']");
+const historyTab = document.querySelector("[data-tab='history']");
+const historySection = document.querySelector(".history");
 const myAppletsCta = document.querySelector(".my-applets__cta");
 const myAppletsList = document.querySelector(".my-applets__list");
 const myAppletsEmpty = document.querySelector(".my-applets__empty");
+const historyLogsList = document.querySelector(".history__logs-list");
+const historyLogsEmpty = document.querySelector(".history__logs-empty");
 
 const showExplorer = () => {
   if (authQuick) authQuick.style.display = "block";
   if (myApplets) myApplets.style.display = "none";
+  if (historySection) historySection.style.display = "none";
   explorerTab?.classList.add("is-active");
   myAppletsTab?.classList.remove("is-active");
+  historyTab?.classList.remove("is-active");
 };
 
 const showMyApplets = () => {
   if (authQuick) authQuick.style.display = "none";
   if (myApplets) myApplets.style.display = "block";
+  if (historySection) historySection.style.display = "none";
   explorerTab?.classList.remove("is-active");
   myAppletsTab?.classList.add("is-active");
+  historyTab?.classList.remove("is-active");
   fetchApplets();
+  fetchLogs();
+};
+
+const showHistory = () => {
+  if (authQuick) authQuick.style.display = "none";
+  if (myApplets) myApplets.style.display = "none";
+  if (historySection) historySection.style.display = "block";
+  explorerTab?.classList.remove("is-active");
+  myAppletsTab?.classList.remove("is-active");
+  historyTab?.classList.add("is-active");
+  fetchLogs();
 };
 
 if (explorerTab) {
@@ -91,6 +128,10 @@ if (explorerTab) {
 
 if (myAppletsTab) {
   myAppletsTab.addEventListener("click", showMyApplets);
+}
+
+if (historyTab) {
+  historyTab.addEventListener("click", showHistory);
 }
 
 if (myAppletsCta) {
@@ -127,7 +168,9 @@ const renderApplets = (applets) => {
         <div class="my-applet-card__body">
           <h3>${applet.name}</h3>
         </div>
-        <button class="my-applet-card__delete" type="button">Supprimer</button>
+        <div class="my-applet-card__actions">
+          <button class="my-applet-card__delete" type="button">Supprimer</button>
+        </div>
       </article>
     `
     )
@@ -143,6 +186,59 @@ const fetchApplets = async () => {
   if (!response.ok) return;
   const applets = await response.json();
   renderApplets(applets);
+};
+
+const renderLogs = (logs) => {
+  const statusLabel = (status) => {
+    if (status === "success") return "Succès";
+    if (status === "skipped") return "Ignoré";
+    if (status === "error") return "Erreur";
+    return status;
+  };
+  const messageLabel = (message) => {
+    if (!message) return "";
+    if (message === "Aucune nouvelle action") return "Aucune nouvelle action";
+    if (message === "Réaction exécutée") return "Réaction exécutée";
+    if (message === "Service Google non connecté") return "Service Google non connecté";
+    if (message === "La réaction Gmail nécessite un destinataire") {
+      return "La réaction Gmail nécessite un destinataire";
+    }
+    if (message === "Token Google incomplet. Reconnecte Google avec l'accès hors ligne.") {
+      return "Token Google incomplet. Reconnecte Google avec l'accès hors ligne.";
+    }
+    return message;
+  };
+  if (historyLogsList && historyLogsEmpty) {
+    if (!logs.length) {
+      historyLogsEmpty.hidden = false;
+      historyLogsList.hidden = true;
+    } else {
+      historyLogsEmpty.hidden = true;
+      historyLogsList.hidden = false;
+      historyLogsList.innerHTML = logs
+        .map(
+          (log) => `
+        <li class="history__log">
+          <span class="history__log-status history__log-status--${log.status}">${statusLabel(log.status)}</span>
+          <span class="history__log-message">${messageLabel(log.message)}</span>
+          <span class="history__log-date">${new Date(log.created_at).toLocaleString("fr-FR")}</span>
+        </li>
+      `
+        )
+        .join("");
+    }
+  }
+};
+
+const fetchLogs = async () => {
+  if (!isAuth) return;
+  const token = localStorage.getItem("access_token");
+  const response = await fetch(`${API_URL}/applets/logs`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) return;
+  const logs = await response.json();
+  renderLogs(logs);
 };
 
 if (myAppletsList) {
@@ -297,10 +393,14 @@ const filterStepByService = (stepNumber, service) => {
   });
 };
 
-const showConfig = (choiceKey) => {
-  const configs = document.querySelectorAll(".applet-config");
+const showConfigInStep = (stepNumber, choiceKey) => {
+  const step = document.querySelector(`.applet-step[data-step="${stepNumber}"]`);
+  if (!step) return;
+  const configs = step.querySelectorAll(".applet-config");
   configs.forEach((config) => {
-    config.hidden = config.dataset.config !== choiceKey;
+    const matches = config.dataset.config === choiceKey;
+    config.hidden = !matches;
+    config.style.display = matches ? "grid" : "none";
   });
 };
 
@@ -314,10 +414,13 @@ const updateAppletSteps = () => {
   filterStepByService(2, actionService);
   filterStepByService(5, reactionService);
   if (appletStepIndex + 1 === 3) {
-    showConfig(actionChoice);
+    if (!actionChoice && actionService) {
+      actionChoice = actionService === "agenda" ? "agenda_new_event" : "gmail_new_mail";
+    }
+    showConfigInStep(3, actionChoice);
   }
   if (appletStepIndex + 1 === 6) {
-    showConfig(reactionChoice);
+    showConfigInStep(6, reactionChoice);
   }
   if (appletStepIndex + 1 === 7) {
     const actionLogo = document.querySelector("[data-confirm='action']");
@@ -392,6 +495,7 @@ if (appletModal) {
       }
       if (stepNumber === 2) {
         actionChoice = choice || null;
+        showConfigInStep(3, actionChoice);
       }
       if (stepNumber === 4) {
         reactionService = service;
@@ -399,6 +503,7 @@ if (appletModal) {
       }
       if (stepNumber === 5) {
         reactionChoice = choice || null;
+        showConfigInStep(6, reactionChoice);
       }
       updateAppletSteps();
     }
@@ -425,12 +530,37 @@ if (appletNext) {
     if (currentStep === 7) {
       const token = localStorage.getItem("access_token");
       if (!token) return;
+      const actionConfig = {};
+      if (actionChoice === "gmail_new_mail") {
+        actionConfig.from_email = document.querySelector("[data-config='gmail_new_mail'] input")?.value || "";
+      }
+      if (actionChoice === "agenda_new_event") {
+        const inputs = document.querySelectorAll("[data-config='agenda_new_event'] input");
+        actionConfig.calendar = inputs[0]?.value || "";
+        actionConfig.start_date = inputs[1]?.value || "";
+        actionConfig.end_date = inputs[2]?.value || "";
+      }
+      const reactionConfig = {};
+      if (reactionChoice === "gmail_send_mail") {
+        const inputs = document.querySelectorAll("[data-config='gmail_send_mail'] input, [data-config='gmail_send_mail'] textarea");
+        reactionConfig.to = inputs[0]?.value || "";
+        reactionConfig.subject = inputs[1]?.value || "";
+        reactionConfig.message = inputs[2]?.value || "";
+      }
+      if (reactionChoice === "agenda_create_event") {
+        const inputs = document.querySelectorAll("[data-config='agenda_create_event'] input");
+        reactionConfig.title = inputs[0]?.value || "";
+        reactionConfig.start_date = inputs[1]?.value || "";
+        reactionConfig.end_date = inputs[2]?.value || "";
+      }
       const payload = {
         name: appletNameInput?.value?.trim() || "Mon applet",
         action_service: actionService,
         action_choice: actionChoice,
         reaction_service: reactionService,
         reaction_choice: reactionChoice,
+        action_config: actionConfig,
+        reaction_config: reactionConfig,
       };
       const response = await fetch(`${API_URL}/applets`, {
         method: "POST",

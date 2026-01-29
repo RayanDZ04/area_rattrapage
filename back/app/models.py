@@ -47,6 +47,20 @@ class Applet(Base):
     action_choice: Mapped[str] = mapped_column(String(100))
     reaction_service: Mapped[str] = mapped_column(String(50))
     reaction_choice: Mapped[str] = mapped_column(String(100))
+    action_config: Mapped[str] = mapped_column(Text, default="{}")
+    reaction_config: Mapped[str] = mapped_column(Text, default="{}")
+    last_action_marker: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user: Mapped[User] = relationship(back_populates="applets")
+
+
+class AppletLog(Base):
+    __tablename__ = "applet_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), index=True)
+    applet_id: Mapped[int] = mapped_column(Integer, ForeignKey("applets.id"), index=True)
+    status: Mapped[str] = mapped_column(String(20))
+    message: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
