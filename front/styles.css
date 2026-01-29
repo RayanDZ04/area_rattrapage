@@ -242,6 +242,14 @@ body.home.is-authenticated .info-content {
   display: none;
 }
 
+body.home.is-authenticated .auth-quick {
+  display: block;
+}
+
+body.home:not(.is-authenticated) .auth-quick__titles-bar {
+  display: none;
+}
+
 .hero-panel {
   background: transparent;
   border: none;
@@ -251,11 +259,130 @@ body.home.is-authenticated .info-content {
   max-width: 760px;
 }
 
+.auth-quick__titles-bar {
+  display: flex;
+  margin: 6px auto 6px;
+  width: 100%;
+  justify-content: space-between;
+  gap: 0;
+  padding: 0 8vw;
+  color: #111111;
+  font-weight: 800;
+  font-size: 2.5rem;
+  letter-spacing: 0.02em;
+}
+
 .info-section {
   background: #ffffff;
   padding: 40px 8vw 64px;
   display: flex;
   justify-content: center;
+}
+
+.auth-quick {
+  display: none;
+  background: #f5f6f8;
+  padding: 0 8vw 72px;
+}
+
+.auth-quick__stack {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+
+.auth-quick__page-title {
+  margin: 6px 0 8px;
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #111111;
+  letter-spacing: 0.01em;
+}
+
+.auth-quick__title-item {
+  font-size: 1.05rem;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+.auth-quick__title-item.is-active {
+  opacity: 1;
+}
+
+.auth-quick__card {
+  width: min(320px, 100%);
+  min-height: 360px;
+  margin: -4px 0 0;
+  background: linear-gradient(150deg, #1a73e8 0%, #185abc 100%);
+  border-radius: 22px;
+  padding: 22px 24px 20px;
+  display: grid;
+  align-content: space-between;
+  gap: 18px;
+  box-shadow: 0 22px 45px rgba(17, 24, 39, 0.22);
+  border: none;
+}
+
+.auth-quick__header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.auth-quick__logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.auth-quick__content {
+  display: grid;
+  gap: 6px;
+  color: #ffffff;
+}
+
+.auth-quick__title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.auth-quick__subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+}
+
+.auth-quick__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.auth-quick__brand {
+  font-size: 0.95rem;
+}
+
+.auth-quick__plus {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 2px dashed rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(17, 24, 39, 0.18);
 }
 
 .info-content {

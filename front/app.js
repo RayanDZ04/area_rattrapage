@@ -36,16 +36,31 @@ const applyAuthFromUrl = () => {
 applyAuthFromUrl();
 setUserDisplay();
 
-const isAuth = Boolean(localStorage.getItem("access_token"));
+const isAuthenticated = () => Boolean(localStorage.getItem("access_token"));
+const isAuth = isAuthenticated();
 if (isAuth && (loginForm || registerForm)) {
   window.location.href = "index.html";
 }
+
+document.addEventListener("click", (event) => {
+  const target = event.target.closest(".info-panel__cta, .info-media img, .info-media");
+  if (!target) return;
+  if (!isAuthenticated()) {
+    event.preventDefault();
+    window.location.href = "register.html";
+  }
+});
 
 if (isAuth && document.body.classList.contains("home")) {
   const hero = document.querySelector(".hero");
   if (hero) {
     hero.style.display = "none";
   }
+}
+
+const authQuick = document.querySelector(".auth-quick");
+if (authQuick) {
+  authQuick.style.display = isAuth ? "block" : "none";
 }
 
 const settingsForm = document.getElementById("settings-form");
