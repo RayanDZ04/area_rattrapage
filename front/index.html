@@ -68,7 +68,7 @@
         </main>
       </section>
       <div class="auth-quick__titles-bar">
-        <span class="auth-quick__title-item is-active">Créer un applet</span>
+        <span class="auth-quick__title-item is-active">Explorer</span>
         <span class="auth-quick__title-item">Mes applets</span>
       </div>
       <section class="info-section">
@@ -126,6 +126,96 @@
         <ul class="service-modal__list">
           <li><span>Google</span></li>
         </ul>
+      </div>
+    </div>
+
+    <div class="applet-modal" id="applet-modal" aria-hidden="true">
+      <div class="applet-modal__backdrop" data-applet-close="true"></div>
+      <div class="applet-modal__content" role="dialog" aria-modal="true" aria-label="Créer un applet">
+        <div class="applet-modal__header">
+          <h2>Créer un applet</h2>
+          <button class="applet-modal__close" type="button" aria-label="Fermer" data-applet-close="true">×</button>
+        </div>
+        <div class="applet-steps">
+          <div class="applet-step" data-step="1">
+            <p class="applet-step__title">Choisis un service</p>
+            <div class="applet-step__grid">
+              <div class="applet-card" data-service="gmail">
+                <img src="assets/gmail.webp" alt="Gmail" class="applet-card__icon" />
+                <div>
+                  <p class="applet-card__name">Gmail</p>
+                </div>
+              </div>
+              <div class="applet-card" data-service="agenda">
+                <img src="assets/agenda.webp" alt="Google Agenda" class="applet-card__icon" />
+                <div>
+                  <p class="applet-card__name">Google Agenda</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="applet-step" data-step="2" hidden>
+            <p class="applet-step__title">Choisis une action</p>
+            <div class="applet-step__grid">
+              <div class="applet-card" data-service="gmail" data-choice="gmail_new_mail">
+                <img src="assets/gmail.webp" alt="Gmail" class="applet-card__icon" />
+                <div>
+                  <p class="applet-card__name">Un nouveau mail a été reçu</p>
+                </div>
+              </div>
+              <div class="applet-card" data-service="agenda" data-choice="agenda_new_event">
+                <img src="assets/agenda.webp" alt="Google Agenda" class="applet-card__icon" />
+                <div>
+                  <p class="applet-card__name">Un nouvel évènement a été créé</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="applet-step" data-step="3" hidden>
+            <p class="applet-step__title">Choisis un service</p>
+            <div class="applet-step__grid">
+              <div class="applet-card" data-service="gmail">
+                <img src="assets/gmail.webp" alt="Gmail" class="applet-card__icon" />
+                <div>
+                  <p class="applet-card__name">Gmail</p>
+                </div>
+              </div>
+              <div class="applet-card" data-service="agenda">
+                <img src="assets/agenda.webp" alt="Google Agenda" class="applet-card__icon" />
+                <div>
+                  <p class="applet-card__name">Google Agenda</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="applet-step" data-step="4" hidden>
+            <p class="applet-step__title">Choisis une réaction</p>
+            <div class="applet-step__grid">
+              <div class="applet-card" data-service="gmail" data-choice="gmail_send_mail">
+                <img src="assets/gmail.webp" alt="Gmail" class="applet-card__icon" />
+                <div>
+                  <p class="applet-card__name">Envoyer un mail</p>
+                </div>
+              </div>
+              <div class="applet-card" data-service="agenda" data-choice="agenda_create_event">
+                <img src="assets/agenda.webp" alt="Google Agenda" class="applet-card__icon" />
+                <div>
+                  <p class="applet-card__name">Créer un évènement</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="applet-modal__footer">
+          <button class="applet-btn applet-btn--ghost" type="button" data-applet-prev="true">Retour</button>
+          <div class="applet-steps__dots">
+            <span class="applet-dot is-active" data-dot="1"></span>
+            <span class="applet-dot" data-dot="2"></span>
+            <span class="applet-dot" data-dot="3"></span>
+            <span class="applet-dot" data-dot="4"></span>
+          </div>
+          <button class="applet-btn" type="button" data-applet-next="true">Suivant</button>
+        </div>
       </div>
     </div>
 

@@ -164,6 +164,124 @@ if (logoutButton) {
   });
 }
 
+const appletModal = document.getElementById("applet-modal");
+const appletPlus = document.querySelector(".auth-quick__plus");
+const appletSteps = document.querySelectorAll(".applet-step");
+const appletDots = document.querySelectorAll(".applet-dot");
+let appletStepIndex = 0;
+let actionService = null;
+let reactionService = null;
+let actionChoice = null;
+let reactionChoice = null;
+
+const filterStepByService = (stepNumber, service) => {
+  const step = document.querySelector(`.applet-step[data-step="${stepNumber}"]`);
+  if (!step) return;
+  const cards = step.querySelectorAll(".applet-card[data-service]");
+  cards.forEach((card) => {
+    const matches = !service || card.dataset.service === service;
+    card.hidden = false;
+    card.style.display = matches ? "flex" : "none";
+  });
+};
+
+const updateAppletSteps = () => {
+  appletSteps.forEach((step, index) => {
+    step.hidden = index !== appletStepIndex;
+  });
+  appletDots.forEach((dot, index) => {
+    dot.classList.toggle("is-active", index === appletStepIndex);
+  });
+  filterStepByService(2, actionService);
+  filterStepByService(4, reactionService);
+  updateNextButtonState();
+};
+
+const updateNextButtonState = () => {
+  if (!appletNext) return;
+  const currentStep = appletStepIndex + 1;
+  let enabled = true;
+  if (currentStep === 1) enabled = Boolean(actionService);
+  if (currentStep === 2) enabled = Boolean(actionChoice);
+  if (currentStep === 3) enabled = Boolean(reactionService);
+  if (currentStep === 4) enabled = Boolean(reactionChoice);
+  appletNext.disabled = !enabled;
+  appletNext.classList.toggle("is-disabled", !enabled);
+};
+
+const openAppletModal = () => {
+  if (!appletModal) return;
+  appletStepIndex = 0;
+  actionService = null;
+  reactionService = null;
+  actionChoice = null;
+  reactionChoice = null;
+  updateAppletSteps();
+  appletModal.classList.add("is-open");
+  appletModal.setAttribute("aria-hidden", "false");
+};
+
+const closeAppletModal = () => {
+  if (!appletModal) return;
+  appletModal.classList.remove("is-open");
+  appletModal.setAttribute("aria-hidden", "true");
+};
+
+if (appletPlus) {
+  appletPlus.addEventListener("click", openAppletModal);
+}
+
+if (appletModal) {
+  appletModal.addEventListener("click", (event) => {
+    const target = event.target;
+    if (target && target.getAttribute("data-applet-close") === "true") {
+      closeAppletModal();
+    }
+    const card = target?.closest(".applet-card[data-service]");
+    const step = target?.closest(".applet-step");
+    if (card && step) {
+      const stepNumber = Number(step.dataset.step);
+      const service = card.dataset.service;
+      const choice = card.dataset.choice;
+      const cards = step.querySelectorAll(".applet-card");
+      cards.forEach((item) => item.classList.remove("is-selected"));
+      card.classList.add("is-selected");
+      if (stepNumber === 1) {
+        actionService = service;
+        actionChoice = null;
+      }
+      if (stepNumber === 2) {
+        actionChoice = choice || null;
+      }
+      if (stepNumber === 3) {
+        reactionService = service;
+        reactionChoice = null;
+      }
+      if (stepNumber === 4) {
+        reactionChoice = choice || null;
+      }
+      updateAppletSteps();
+    }
+  });
+}
+
+const appletPrev = document.querySelector("[data-applet-prev='true']");
+const appletNext = document.querySelector("[data-applet-next='true']");
+
+if (appletPrev) {
+  appletPrev.addEventListener("click", () => {
+    appletStepIndex = Math.max(0, appletStepIndex - 1);
+    updateAppletSteps();
+  });
+}
+
+if (appletNext) {
+  appletNext.addEventListener("click", () => {
+    appletStepIndex = Math.min(appletSteps.length - 1, appletStepIndex + 1);
+    updateAppletSteps();
+  });
+}
+
 const googleButtons = document.querySelectorAll(".google-auth");
 googleButtons.forEach((button) => {
   button.addEventListener("click", () => {
