@@ -68,8 +68,8 @@
         </main>
       </section>
       <div class="auth-quick__titles-bar">
-        <span class="auth-quick__title-item is-active">Explorer</span>
-        <span class="auth-quick__title-item">Mes applets</span>
+        <span class="auth-quick__title-item is-active" data-tab="explorer">Explorer</span>
+        <span class="auth-quick__title-item" data-tab="my-applets">Mes applets</span>
       </div>
       <section class="info-section">
         <div class="info-content">
@@ -102,6 +102,13 @@
               <button class="auth-quick__plus" type="button" aria-label="Créer une nouvelle applet">+</button>
             </div>
           </div>
+        </div>
+      </section>
+      <section class="my-applets" aria-hidden="true">
+        <div class="my-applets__empty">
+          <h2>Aucune applet pour le moment</h2>
+          <p>Crée ta première applet pour automatiser tes services.</p>
+          <button class="my-applets__cta" type="button">Créer un applet</button>
         </div>
       </section>
     </div>

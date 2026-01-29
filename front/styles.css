@@ -246,6 +246,11 @@ body.home.is-authenticated .auth-quick {
   display: block;
 }
 
+body.home.is-authenticated .my-applets {
+  display: none;
+}
+
+
 body.home:not(.is-authenticated) .auth-quick__titles-bar {
   display: none;
 }
@@ -271,6 +276,7 @@ body.home:not(.is-authenticated) .auth-quick__titles-bar {
   font-size: 2.5rem;
   letter-spacing: 0.02em;
 }
+
 
 .info-section {
   background: #ffffff;
@@ -303,10 +309,49 @@ body.home:not(.is-authenticated) .auth-quick__titles-bar {
   font-size: 1.05rem;
   font-weight: 700;
   opacity: 0.6;
+  cursor: pointer;
 }
 
 .auth-quick__title-item.is-active {
   opacity: 1;
+}
+
+.my-applets {
+  display: none;
+  background: #f5f6f8;
+  padding: 0 8vw 72px;
+}
+
+.my-applets__empty {
+  max-width: 640px;
+  margin: 24px auto 0;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 20px 45px rgba(17, 24, 39, 0.12);
+}
+
+.my-applets__empty h2 {
+  margin: 0 0 8px;
+  font-size: 1.8rem;
+  color: #111111;
+}
+
+.my-applets__empty p {
+  margin: 0 0 18px;
+  color: #5b6472;
+  font-size: 1.05rem;
+}
+
+.my-applets__cta {
+  border: none;
+  background: #111111;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 12px 26px;
+  border-radius: 999px;
+  cursor: pointer;
 }
 
 .auth-quick__card {

@@ -63,6 +63,38 @@ if (authQuick) {
   authQuick.style.display = isAuth ? "block" : "none";
 }
 
+const myApplets = document.querySelector(".my-applets");
+const explorerTab = document.querySelector("[data-tab='explorer']");
+const myAppletsTab = document.querySelector("[data-tab='my-applets']");
+const myAppletsCta = document.querySelector(".my-applets__cta");
+
+const showExplorer = () => {
+  if (authQuick) authQuick.style.display = "block";
+  if (myApplets) myApplets.style.display = "none";
+  explorerTab?.classList.add("is-active");
+  myAppletsTab?.classList.remove("is-active");
+};
+
+const showMyApplets = () => {
+  if (authQuick) authQuick.style.display = "none";
+  if (myApplets) myApplets.style.display = "block";
+  explorerTab?.classList.remove("is-active");
+  myAppletsTab?.classList.add("is-active");
+};
+
+if (explorerTab) {
+  explorerTab.addEventListener("click", showExplorer);
+}
+
+if (myAppletsTab) {
+  myAppletsTab.addEventListener("click", showMyApplets);
+}
+
+if (myAppletsCta) {
+  myAppletsCta.addEventListener("click", showExplorer);
+}
+
+
 const settingsForm = document.getElementById("settings-form");
 if (settingsForm && !isAuth) {
   window.location.href = "login.html";
