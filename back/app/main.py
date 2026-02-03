@@ -1,7 +1,9 @@
 import os
 import asyncio
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from starlette.responses import Response
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 from sqlalchemy import text
@@ -29,6 +31,39 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/", include_in_schema=False)
+def root(request: Request):
+        accept = (request.headers.get("accept") or "").lower()
+        if "text/html" in accept:
+                return HTMLResponse(
+                        """
+                        <!doctype html>
+                        <html lang="en">
+                            <head>
+                                <meta charset="utf-8" />
+                                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                                <title>AREA API</title>
+                            </head>
+                            <body>
+                                <h1>AREA IFTTT Basic API</h1>
+                                <ul>
+                                    <li><a href="/docs">Swagger UI</a></li>
+                                    <li><a href="/redoc">ReDoc</a></li>
+                                    <li><a href="/openapi.json">OpenAPI JSON</a></li>
+                                    <li><a href="/health">Health check</a></li>
+                                </ul>
+                            </body>
+                        </html>
+                        """.strip()
+                )
+        return {"name": app.title, "docs": "/docs", "health": "/health"}
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+        return Response(status_code=204)
 
 
 @app.get("/health")

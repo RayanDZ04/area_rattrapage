@@ -141,6 +141,41 @@ if (myAppletsCta) {
 const serviceLogo = (service) =>
   service === "agenda" ? "assets/agenda.webp" : "assets/gmail.webp";
 
+let appletIndexById = {};
+
+const truncateText = (value, maxLen = 80) => {
+  if (!value) return "";
+  const text = String(value);
+  return text.length > maxLen ? `${text.slice(0, maxLen - 1)}…` : text;
+};
+
+const reactionDetailsLabel = (applet) => {
+  if (!applet) return "";
+  const config = applet.reaction_config || {};
+
+  if (applet.reaction_choice === "gmail_send_mail") {
+    const to = config.to ? String(config.to) : "";
+    const subject = config.subject ? String(config.subject) : "";
+    const message = config.message ? String(config.message) : "";
+    const parts = [];
+    if (to) parts.push(`à ${to}`);
+    if (subject) parts.push(`objet: ${truncateText(subject, 60)}`);
+    if (message) parts.push(`message: ${truncateText(message, 90)}`);
+    return parts.length ? `Mail envoyé ${parts.join(" · ")}` : "Mail envoyé";
+  }
+
+  if (applet.reaction_choice === "agenda_create_event") {
+    const title = config.title ? String(config.title) : "Nouvel évènement";
+    const start = config.start_date ? String(config.start_date) : "";
+    const end = config.end_date ? String(config.end_date) : "";
+    if (start && end) return `Évènement créé: ${title} (${start} → ${end})`;
+    if (start) return `Évènement créé: ${title} (début: ${start})`;
+    return `Évènement créé: ${title}`;
+  }
+
+  return "";
+};
+
 const renderApplets = (applets) => {
   if (!myAppletsList || !myAppletsEmpty) return;
   if (!applets.length) {
@@ -177,7 +212,7 @@ const renderApplets = (applets) => {
     .join("");
 };
 
-const fetchApplets = async () => {
+const fetchApplets = async ({ render = true } = {}) => {
   if (!isAuth) return;
   const token = localStorage.getItem("access_token");
   const response = await fetch(`${API_URL}/applets`, {
@@ -185,7 +220,14 @@ const fetchApplets = async () => {
   });
   if (!response.ok) return;
   const applets = await response.json();
-  renderApplets(applets);
+
+  appletIndexById = Object.fromEntries(applets.map((applet) => [String(applet.id), applet]));
+
+  if (render) {
+    renderApplets(applets);
+  }
+
+  return applets;
 };
 
 const renderLogs = (logs) => {
@@ -216,15 +258,36 @@ const renderLogs = (logs) => {
       historyLogsEmpty.hidden = true;
       historyLogsList.hidden = false;
       historyLogsList.innerHTML = logs
-        .map(
-          (log) => `
+        .map((log) => {
+          const applet = appletIndexById[String(log.applet_id)];
+          const title = applet?.name ? applet.name : `Applet #${log.applet_id}`;
+          const actionLogo = applet?.action_service ? serviceLogo(applet.action_service) : null;
+          const reactionLogo = applet?.reaction_service ? serviceLogo(applet.reaction_service) : null;
+
+          let messageText = messageLabel(log.message);
+          if (log.status === "success" && log.message === "Réaction exécutée") {
+            const detailed = reactionDetailsLabel(applet);
+            if (detailed) messageText = detailed;
+          }
+
+          return `
         <li class="history__log">
+          <div class="history__log-header">
+            <div class="history__log-summary">
+              <div class="history__log-logos" aria-hidden="true">
+                ${actionLogo ? `<img class="history__log-logo" src="${actionLogo}" alt="" />` : ""}
+                <span class="history__log-arrow">→</span>
+                ${reactionLogo ? `<img class="history__log-logo" src="${reactionLogo}" alt="" />` : ""}
+              </div>
+              <span class="history__log-title">${title}</span>
+            </div>
+          </div>
           <span class="history__log-status history__log-status--${log.status}">${statusLabel(log.status)}</span>
-          <span class="history__log-message">${messageLabel(log.message)}</span>
+          <span class="history__log-message">${messageText}</span>
           <span class="history__log-date">${new Date(log.created_at).toLocaleString("fr-FR")}</span>
         </li>
-      `
-        )
+      `;
+        })
         .join("");
     }
   }
@@ -232,6 +295,10 @@ const renderLogs = (logs) => {
 
 const fetchLogs = async () => {
   if (!isAuth) return;
+
+  if (!Object.keys(appletIndexById).length) {
+    await fetchApplets({ render: false });
+  }
   const token = localStorage.getItem("access_token");
   const response = await fetch(`${API_URL}/applets/logs`, {
     headers: { Authorization: `Bearer ${token}` },

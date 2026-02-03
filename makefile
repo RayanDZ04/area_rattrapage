@@ -48,6 +48,8 @@ front:
 serve: backend front
 
 web: env install
+	@echo "Front:  http://127.0.0.1:5173/"
+	@echo "Back:   http://127.0.0.1:8080/ (docs: /docs)"
 	@$(MAKE) -j2 serve
 
 clean:

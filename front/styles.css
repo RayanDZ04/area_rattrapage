@@ -515,6 +515,49 @@ body.home:not(.is-authenticated) .auth-quick__titles-bar {
   background: #f3f4f6;
 }
 
+.history__log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.history__log-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.history__log-logos {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.history__log-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  background: #1a73e8;
+  border-radius: 12px;
+  padding: 6px;
+}
+
+.history__log-arrow {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.history__log-title {
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .history__log-status {
   display: inline-flex;
   align-items: center;
