@@ -195,9 +195,9 @@ const renderApplets = (applets) => {
             <span class="my-applet-card__arrow">→</span>
             <img src="${serviceLogo(applet.reaction_service)}" alt="Réaction" class="my-applet-card__logo" />
           </div>
-          <button class="my-applet-card__toggle" type="button" aria-pressed="true">
+          <button class="my-applet-card__toggle ${applet.is_active === false ? "is-off" : ""}" type="button" aria-pressed="${applet.is_active === false ? "false" : "true"}">
             <span class="my-applet-card__dot"></span>
-            <span>Activé</span>
+            <span>${applet.is_active === false ? "Désactivé" : "Activé"}</span>
           </button>
         </div>
         <div class="my-applet-card__body">
@@ -317,9 +317,38 @@ if (myAppletsList) {
       const toggle = target.closest(".my-applet-card__toggle");
       const label = toggle.querySelector("span:last-child");
       const isActive = toggle.getAttribute("aria-pressed") !== "false";
-      toggle.setAttribute("aria-pressed", String(!isActive));
-      toggle.classList.toggle("is-off", isActive);
-      if (label) label.textContent = isActive ? "Désactivé" : "Activé";
+      const nextActive = !isActive;
+
+      toggle.setAttribute("aria-pressed", String(nextActive));
+      toggle.classList.toggle("is-off", !nextActive);
+      if (label) label.textContent = nextActive ? "Activé" : "Désactivé";
+
+      const token = localStorage.getItem("access_token");
+      const appletId = card.dataset.id;
+      const response = await fetch(`${API_URL}/applets/${appletId}/active`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ is_active: nextActive }),
+      });
+
+      if (!response.ok) {
+        toggle.setAttribute("aria-pressed", String(isActive));
+        toggle.classList.toggle("is-off", isActive === false);
+        if (label) label.textContent = isActive ? "Activé" : "Désactivé";
+        const errorText = await response.text();
+        alert(`Impossible de changer l'état de l'applet: ${errorText}`);
+        return;
+      }
+
+      try {
+        const updatedApplet = await response.json();
+        appletIndexById[String(updatedApplet.id)] = updatedApplet;
+      } catch {
+        // ignore
+      }
       return;
     }
     if (target.classList.contains("my-applet-card__delete")) {

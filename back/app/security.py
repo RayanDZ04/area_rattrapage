@@ -1,10 +1,16 @@
+import os
+from pathlib import Path
 from datetime import datetime, timedelta
 from jose import jwt
 from passlib.context import CryptContext
+from dotenv import load_dotenv
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-SECRET_KEY = "dev-secret-change-me"
+ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=ENV_PATH, override=True)
+
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import asyncio
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +13,8 @@ from .database import Base, engine, SessionLocal
 from . import models
 from .routers import auth, applets
 
-load_dotenv(override=True)
+ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=ENV_PATH, override=True)
 
 app = FastAPI(title="AREA IFTT Basic API")
 
@@ -27,6 +29,7 @@ app.add_middleware(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -113,6 +116,8 @@ def on_startup():
                 conn.execute(text("ALTER TABLE applets ADD COLUMN action_config TEXT DEFAULT '{}'"))
             if "reaction_config" not in existing:
                 conn.execute(text("ALTER TABLE applets ADD COLUMN reaction_config TEXT DEFAULT '{}'"))
+            if "is_active" not in existing:
+                conn.execute(text("ALTER TABLE applets ADD COLUMN is_active INTEGER DEFAULT 1"))
             if "last_action_marker" not in existing:
                 conn.execute(text("ALTER TABLE applets ADD COLUMN last_action_marker VARCHAR(255)"))
         conn.execute(

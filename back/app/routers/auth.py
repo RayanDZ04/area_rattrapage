@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -16,7 +17,8 @@ from ..security import hash_password, verify_password, create_access_token, SECR
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
 
-load_dotenv(override=True)
+ENV_PATH = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(dotenv_path=ENV_PATH, override=True)
 
 
 def get_env(name: str) -> str | None:
@@ -24,6 +26,13 @@ def get_env(name: str) -> str | None:
     if value is None:
         return None
     return value.strip()
+
+
+def get_backend_url_from_request(request: Request) -> str:
+    host = request.headers.get("host")
+    if host:
+        return f"{request.url.scheme}://{host}".rstrip("/")
+    return str(request.base_url).rstrip("/")
 
 oauth = OAuth()
 oauth.register(
@@ -104,7 +113,7 @@ def me(current_user: models.User = Depends(get_current_user)):
 @router.get("/google/login")
 async def google_login(request: Request):
     request.session.clear()
-    backend_url = os.getenv("BACKEND_URL", "http://localhost:8080").rstrip("/")
+    backend_url = get_backend_url_from_request(request)
     redirect_uri = f"{backend_url}/auth/google/callback"
     return await oauth.google.authorize_redirect(
         request,
@@ -116,8 +125,8 @@ async def google_login(request: Request):
 
 
 @router.get("/google/debug")
-def google_debug():
-    backend_url = os.getenv("BACKEND_URL", "http://localhost:8080").rstrip("/")
+def google_debug(request: Request):
+    backend_url = get_backend_url_from_request(request)
     secret = get_env("GOOGLE_CLIENT_SECRET") or ""
     client_secret = oauth.google.client_secret or ""
     return {
@@ -128,14 +137,35 @@ def google_debug():
         "oauth_client_secret_set": bool(client_secret),
         "oauth_client_secret_len": len(client_secret),
         "oauth_token_auth_method": oauth.google.client_kwargs.get("token_endpoint_auth_method"),
+        "oauth_scope": oauth.google.client_kwargs.get("scope"),
+        "request_host": request.headers.get("host"),
+        "request_url": str(request.url),
         "backend_url": backend_url,
         "redirect_uri": f"{backend_url}/auth/google/callback",
     }
 
 
+@router.get("/google/status")
+def google_status(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    token = (
+        db.query(models.ServiceToken)
+        .filter(models.ServiceToken.user_id == current_user.id, models.ServiceToken.provider == "google")
+        .order_by(models.ServiceToken.created_at.desc())
+        .first()
+    )
+    return {
+        "connected": bool(token),
+        "has_refresh_token": bool(token and token.refresh_token),
+        "created_at": token.created_at if token else None,
+    }
+
+
 @router.get("/google/callback")
 async def google_callback(request: Request, db: Session = Depends(get_db)):
-    backend_url = os.getenv("BACKEND_URL", "http://localhost:8080").rstrip("/")
+    backend_url = get_backend_url_from_request(request)
     redirect_uri = f"{backend_url}/auth/google/callback"
     async def manual_exchange(auth_code: str):
         token_endpoint = "https://oauth2.googleapis.com/token"

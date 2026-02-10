@@ -55,10 +55,15 @@ class AppletOut(BaseModel):
     reaction_choice: str
     action_config: dict
     reaction_config: dict
+    is_active: bool
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class AppletActiveUpdate(BaseModel):
+    is_active: bool
 
 
 class AppletLogOut(BaseModel):

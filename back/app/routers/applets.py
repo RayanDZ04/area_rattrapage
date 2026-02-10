@@ -1,9 +1,12 @@
 import base64
 import json
+from datetime import datetime, timedelta
 from email.utils import parseaddr
 from email.message import EmailMessage
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from google.auth.exceptions import RefreshError
+from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from sqlalchemy.orm import Session
@@ -63,6 +66,28 @@ def list_applets(
     return applets
 
 
+@router.patch("/{applet_id}/active", response_model=schemas.AppletOut)
+def set_applet_active(
+    applet_id: int,
+    payload: schemas.AppletActiveUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    applet = (
+        db.query(models.Applet)
+        .filter(models.Applet.id == applet_id, models.Applet.user_id == current_user.id)
+        .first()
+    )
+    if not applet:
+        raise HTTPException(status_code=404, detail="Applet introuvable")
+    applet.is_active = bool(payload.is_active)
+    db.commit()
+    db.refresh(applet)
+    applet.action_config = json.loads(applet.action_config or "{}")
+    applet.reaction_config = json.loads(applet.reaction_config or "{}")
+    return applet
+
+
 @router.delete("/{applet_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_applet(
     applet_id: int,
@@ -109,12 +134,18 @@ def get_google_credentials(db: Session, user_id: int) -> Credentials:
             status_code=400,
             detail="Token Google incomplet. Reconnecte Google avec l'accès hors ligne.",
         )
-    return Credentials(
+
+    client_id = get_env("GOOGLE_CLIENT_ID")
+    client_secret = get_env("GOOGLE_CLIENT_SECRET")
+    if not client_id or not client_secret:
+        raise HTTPException(status_code=500, detail="Google OAuth non configuré sur le serveur")
+
+    credentials = Credentials(
         token=token.access_token,
         refresh_token=token.refresh_token,
         token_uri="https://oauth2.googleapis.com/token",
-        client_id=get_env("GOOGLE_CLIENT_ID"),
-        client_secret=get_env("GOOGLE_CLIENT_SECRET"),
+        client_id=client_id,
+        client_secret=client_secret,
         scopes=[
             "https://www.googleapis.com/auth/gmail.readonly",
             "https://www.googleapis.com/auth/gmail.modify",
@@ -123,6 +154,21 @@ def get_google_credentials(db: Session, user_id: int) -> Credentials:
             "https://www.googleapis.com/auth/calendar.events",
         ],
     )
+
+    should_refresh = token.created_at is None
+    if token.created_at is not None:
+        should_refresh = (datetime.utcnow() - token.created_at) > timedelta(minutes=50)
+
+    if should_refresh:
+        try:
+            credentials.refresh(Request())
+        except RefreshError as exc:
+            raise HTTPException(status_code=400, detail="Token Google expiré. Reconnecte Google.") from exc
+        token.access_token = credentials.token or token.access_token
+        token.created_at = datetime.utcnow()
+        db.commit()
+
+    return credentials
 
 
 def log_applet(db: Session, user_id: int, applet_id: int, status: str, message: str):
@@ -140,11 +186,33 @@ def log_applet(db: Session, user_id: int, applet_id: int, status: str, message: 
 def normalize_error_message(message: str) -> str:
     if not message:
         return "Erreur inconnue"
+    lowered = message.lower()
+    if "accessnotconfigured" in message or "has not been used in project" in lowered:
+        if "gmail.googleapis.com" in lowered:
+            return (
+                "L'API Gmail est désactivée (ou jamais activée) sur ton projet Google Cloud. "
+                "Active 'Gmail API' dans Google Cloud Console (APIs & Services → Library), "
+                "attends 2-5 minutes, puis reconnecte Google."
+            )
+        if "calendar.googleapis.com" in lowered:
+            return (
+                "L'API Google Calendar est désactivée (ou jamais activée) sur ton projet Google Cloud. "
+                "Active 'Google Calendar API' dans Google Cloud Console (APIs & Services → Library), "
+                "attends 2-5 minutes, puis reconnecte Google."
+            )
+        return (
+            "Une API Google est désactivée sur ton projet Google Cloud. "
+            "Active les APIs nécessaires (Gmail/Calendar) puis réessaie."
+        )
     if "The credentials do not contain the necessary fields need to refresh the access token" in message:
         return (
             "Identifiants Google incomplets pour rafraîchir le token. "
             "Reconnecte Google pour obtenir un refresh_token."
         )
+    if "invalid_grant" in lowered:
+        return "Autorisation Google expirée ou révoquée. Reconnecte Google."
+    if "unauthorized" in lowered or "permission" in lowered or "insufficientpermissions" in lowered:
+        return "Accès Google refusé. Vérifie les scopes / reconnecte Google."
     return message
 
 
@@ -175,8 +243,6 @@ def run_gmail_action(credentials: Credentials, applet: models.Applet, db: Sessio
     message_id = messages[0]["id"]
     if applet.last_action_marker == message_id:
         return None
-    applet.last_action_marker = message_id
-    db.commit()
     message = (
         gmail.users()
         .messages()
@@ -205,8 +271,6 @@ def run_calendar_action(credentials: Credentials, applet: models.Applet, db: Ses
     event_id = events[0]["id"]
     if applet.last_action_marker == event_id:
         return None
-    applet.last_action_marker = event_id
-    db.commit()
     return {"event_id": event_id, "calendar_id": calendar_id}
 
 
@@ -238,10 +302,26 @@ def run_calendar_reaction(credentials: Credentials, config: dict):
 
 
 def run_applets_for_user(db: Session, user_id: int) -> list[dict]:
-    applets = db.query(models.Applet).filter(models.Applet.user_id == user_id).all()
+    applets = (
+        db.query(models.Applet)
+        .filter(models.Applet.user_id == user_id, models.Applet.is_active.is_(True))
+        .all()
+    )
     if not applets:
         return []
-    credentials = get_google_credentials(db, user_id)
+
+    user_email = db.query(models.User.email).filter(models.User.id == user_id).scalar() or ""
+
+    try:
+        credentials = get_google_credentials(db, user_id)
+    except Exception as exc:
+        message = normalize_error_message(str(exc))
+        results = []
+        for applet in applets:
+            log_applet(db, user_id, applet.id, "error", message)
+            results.append({"id": applet.id, "status": "error"})
+        return results
+
     results = []
     for applet in applets:
         action_config = json.loads(applet.action_config or "{}")
@@ -261,6 +341,8 @@ def run_applets_for_user(db: Session, user_id: int) -> list[dict]:
             if applet.reaction_choice == "gmail_send_mail":
                 if not reaction_config.get("to") and action_payload.get("from"):
                     reaction_config["to"] = extract_email_address(action_payload["from"])
+                if not reaction_config.get("to") and user_email:
+                    reaction_config["to"] = user_email
                 if not reaction_config.get("subject") and action_payload.get("subject"):
                     reaction_config["subject"] = f"RE: {action_payload['subject']}"
                 if not reaction_config.get("message"):
@@ -276,21 +358,18 @@ def run_applets_for_user(db: Session, user_id: int) -> list[dict]:
             if applet.reaction_choice == "agenda_create_event":
                 run_calendar_reaction(credentials, reaction_config)
 
+            marker = action_payload.get("message_id") or action_payload.get("event_id")
+            if marker:
+                applet.last_action_marker = str(marker)
+                db.commit()
+
             log_applet(db, user_id, applet.id, "success", "Réaction exécutée")
             results.append({"id": applet.id, "status": "success"})
         except Exception as exc:
-            log_applet(db, user_id, applet.id, "error", normalize_error_message(str(exc)))
+            detail = exc.detail if isinstance(exc, HTTPException) else str(exc)
+            log_applet(db, user_id, applet.id, "error", normalize_error_message(detail))
             results.append({"id": applet.id, "status": "error"})
     return results
-
-
-@router.post("/run")
-def run_applets(
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
-):
-    results = run_applets_for_user(db, current_user.id)
-    return {"results": results}
 
 
 @router.post("/run")
